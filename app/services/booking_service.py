@@ -32,3 +32,29 @@ class BookingService:
         db_bookings.append(new_booking)
         _id_counter += 1
         return new_booking
+
+    @classmethod
+    def get_bookings(cls, booking_date: date | None = None) -> list[Booking]:
+        if booking_date is None:
+            return db_bookings
+            
+        filtered_bookings = []
+        for b in db_bookings:
+            if b.booking_date == booking_date:
+                filtered_bookings.append(b)
+        return filtered_bookings
+
+    @classmethod
+    def get_booking_by_id(cls, booking_id: int) -> Booking:
+        for b in db_bookings:
+            if b.id == booking_id:
+                return b
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    @classmethod
+    def cancel_booking(cls, booking_id: int) -> Booking:
+        booking = cls.get_booking_by_id(booking_id)
+        
+        booking.status = BookingStatus.CANCELLED
+        return booking
+
