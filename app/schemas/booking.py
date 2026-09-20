@@ -1,6 +1,7 @@
 import re
 from datetime import date, time
 from pydantic import BaseModel, Field, field_validator
+from typing import Literal
 
 class BookingCreate(BaseModel):
     name: str = Field(
@@ -76,5 +77,9 @@ class BookingCreate(BaseModel):
         return value
 
 class BookingOut(BookingCreate):
-    id: int = Field(..., examples=[1])
-    status: str = Field(..., examples=["active"]) # 'active' | 'cancelled'
+    id: int = Field(..., examples=[1], description="Уникальный ID брони")
+    status: Literal['active', 'cancelled'] = Field(
+        ..., 
+        examples=["active"], 
+        description="Текущий статус бронирования: active (активно) или cancelled (отменено)"
+    )
