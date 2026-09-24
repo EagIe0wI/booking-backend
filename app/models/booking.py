@@ -14,4 +14,4 @@ class Booking:
     booking_date: date
     booking_time: time
     guests: int
-    status: BookingStatus = BookingStatus.ACTIVE
+    status: BookingStatus = BookingStatus.ACTIVE.value

@@ -6,15 +6,18 @@ from app.services.booking_service import BookingService
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
-class ErrorResponse(BaseModel):
-    detail: str = Field(..., examples=["Описание ошибки со стороны сервера"])
+class NotFoundResponse(BaseModel):
+    detail: str = Field(..., examples=["Booking not found"])
+
+class ConflictResponse(BaseModel):
+    detail: str = Field(..., examples=["Slot is already booked"])
 
 @router.post(
     "", 
     response_model=BookingOut, 
     status_code=201,
     responses={
-        409: {"model": ErrorResponse, "description": "Слот на выбранные дату/время уже занят"}
+        409: {"model": ConflictResponse, "description": "Слот на выбранные дату/время уже занят"}
     }
 )
 async def create_booking(booking: BookingCreate):
@@ -34,7 +37,7 @@ async def get_all_bookings(date: date | None = Query(None, description="Филь
     "/{booking_id}",
     response_model=BookingOut,
     responses={
-        404: {"model": ErrorResponse, "description": "Бронь с указанным ID не найдена"}
+        404: {"model": NotFoundResponse, "description": "Бронь с указанным ID не найдена"}
     }
 )
 async def get_one_booking(booking_id: int):
@@ -44,7 +47,7 @@ async def get_one_booking(booking_id: int):
     "/{booking_id}", 
     response_model=BookingOut,
     responses={
-        404: {"model": ErrorResponse, "description": "Бронь с указанным ID не найдена для отмены"}
+        404: {"model": NotFoundResponse, "description": "Бронь с указанным ID не найдена для отмены"}
     }
 )
 async def cancel_booking(booking_id: int):

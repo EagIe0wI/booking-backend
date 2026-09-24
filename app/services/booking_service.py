@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, time, datetime
 from app.models.booking import Booking, BookingStatus
 from app.schemas.booking import BookingCreate
 from fastapi import HTTPException
@@ -10,6 +10,16 @@ class BookingService:
     @classmethod
     def create_booking(cls, booking_data: BookingCreate) -> Booking:
         global _id_counter
+
+        today = date.today()
+        if booking_data.booking_date == today:
+            current_time = datetime.now().time()
+            if booking_data.booking_time < current_time:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Нельзя забронировать столик на прошедшее время сегодняшнего дня"
+                )
+
         for existing_booking in db_bookings:
             if existing_booking.status == BookingStatus.ACTIVE:
                 if (existing_booking.booking_date == booking_data.booking_date and 
@@ -26,7 +36,7 @@ class BookingService:
             booking_date=booking_data.booking_date,
             booking_time=booking_data.booking_time,
             guests=booking_data.guests,
-            status=BookingStatus.ACTIVE
+            status=BookingStatus.ACTIVE.value
         )
         
         db_bookings.append(new_booking)
@@ -55,6 +65,6 @@ class BookingService:
     def cancel_booking(cls, booking_id: int) -> Booking:
         booking = cls.get_booking_by_id(booking_id)
         
-        booking.status = BookingStatus.CANCELLED
+        booking.status = BookingStatus.CANCELLED.value
         return booking
 
