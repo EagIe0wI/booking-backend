@@ -43,12 +43,19 @@ class BookingCreate(BaseModel):
     @field_validator('phone')
     @classmethod
     def validate_phone(cls, value: str) -> str:
-        digits = re.sub(r'\D', '', value)
-        
-        if len(digits) == 11 and digits[0] in ('7', '8'):
-            return value
+        if any(c.isalpha() for c in value):
+            raise ValueError("Телефон не должен содержать буквы")
             
-        raise ValueError('Введите корректный номер: +7 или 8, 10 цифр после кода')
+        clean_value = re.sub(r'\D', '', value)
+        
+        if len(clean_value) != 11:
+            raise ValueError("Телефон должен содержать ровно 11 цифр")
+            
+        if clean_value[0] not in ['7', '8']:
+            raise ValueError("Телефон должен начинаться с +7 или 8")
+            
+        return value
+
 
     @field_validator('booking_date')
     @classmethod
