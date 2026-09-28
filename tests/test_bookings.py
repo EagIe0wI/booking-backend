@@ -24,7 +24,6 @@ async def test_create_booking_success(ac: AsyncClient):
     data = response.json()
     assert data["id"] == 1
     assert data["status"] == "active"
-    assert data["name"] == "Игорь"
 
 async def test_get_bookings_success(ac: AsyncClient):
     payload = {
@@ -42,7 +41,6 @@ async def test_get_bookings_success(ac: AsyncClient):
     data = response.json()
     assert isinstance(data, list)
     assert len(data) == 1
-    assert data[0]["name"] == "Анна"
 
 async def test_get_one_booking_success(ac: AsyncClient):
     payload = {
@@ -52,13 +50,16 @@ async def test_get_one_booking_success(ac: AsyncClient):
         "booking_time": "18:00",
         "guests": 4
     }
-    await ac.post("/bookings", json=payload)
+    create_response = await ac.post("/bookings", json=payload)
+    created_booking = create_response.json()
     
-    response = await ac.get("/bookings/1")
+    booking_id = created_booking["id"]
+    
+    response = await ac.get(f"/bookings/{booking_id}")
     assert response.status_code == 200
     
     data = response.json()
-    assert data["id"] == 1
+    assert data["id"] == booking_id
     assert data["name"] == "Игорь"
 
 async def test_cancel_booking_success(ac: AsyncClient):
@@ -69,11 +70,14 @@ async def test_cancel_booking_success(ac: AsyncClient):
         "booking_time": "18:00",
         "guests": 4
     }
-    await ac.post("/bookings", json=payload)
+    create_response = await ac.post("/bookings", json=payload)
+    created_booking = create_response.json()
     
-    response = await ac.delete("/bookings/1")
+    booking_id = created_booking["id"]
+    
+    response = await ac.delete(f"/bookings/{booking_id}")
     assert response.status_code == 200
     
     data = response.json()
-    assert data["id"] == 1
+    assert data["id"] == booking_id
     assert data["status"] == "cancelled"

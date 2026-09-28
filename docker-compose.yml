@@ -6,4 +6,6 @@ services:
     container_name: mise_booking_app
     ports:
       - "8000:8000"
+    volumes:
+      - ./tests:/code/tests
     restart: always
