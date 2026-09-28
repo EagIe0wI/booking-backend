@@ -78,3 +78,41 @@ async def test_get_booking_not_found(ac: AsyncClient):
     response = await ac.get("/bookings/999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Booking not found"
+
+# --- 4. ТЕСТЫ НА ОГРАНИЧЕНИЯ PYDANTIC (422 Unprocessable Entity) ---
+
+async def test_create_booking_name_too_short_error(ac: AsyncClient):
+    """Ошибка 422: Имя слишком короткое (1 символ вместо минимум 2)"""
+    payload = {
+        "name": "И",  # Слишком короткое
+        "phone": "+79991234567",
+        "booking_date": VALID_FUTURE_DATE,
+        "booking_time": "18:00",
+        "guests": 4
+    }
+    response = await ac.post("/bookings", json=payload)
+    assert response.status_code == 422
+
+async def test_create_booking_invalid_phone_error(ac: AsyncClient):
+    """Ошибка 422: В телефоне есть запрещенные буквы"""
+    payload = {
+        "name": "Игорь",
+        "phone": "+79991234567abc",  # Буквы в телефоне
+        "booking_date": VALID_FUTURE_DATE,
+        "booking_time": "18:00",
+        "guests": 4
+    }
+    response = await ac.post("/bookings", json=payload)
+    assert response.status_code == 422
+
+async def test_create_booking_too_many_guests_error(ac: AsyncClient):
+    """Ошибка 422: Превышен лимит гостей (15 вместо максимум 12)"""
+    payload = {
+        "name": "Игорь",
+        "phone": "+79991234567",
+        "booking_date": VALID_FUTURE_DATE,
+        "booking_time": "18:00",
+        "guests": 15  # Больше 12
+    }
+    response = await ac.post("/bookings", json=payload)
+    assert response.status_code == 422
