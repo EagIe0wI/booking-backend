@@ -6,8 +6,6 @@ pytestmark = pytest.mark.asyncio
 
 TODAY = date.today()
 VALID_FUTURE_DATE = (TODAY + timedelta(days=5)).isoformat()
-TOO_LATE_DATE = (TODAY + timedelta(days=95)).isoformat()
-PAST_DATE = (TODAY - timedelta(days=1)).isoformat()
 
 async def test_create_booking_success(ac: AsyncClient):
     payload = {
